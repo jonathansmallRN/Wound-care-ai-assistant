@@ -1,0 +1,15 @@
+.env
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+node_modules/
+dist/
+.vite/
+
+backend/media/*
+!backend/media/.gitkeep
+
+.DS_Store
+*.log
