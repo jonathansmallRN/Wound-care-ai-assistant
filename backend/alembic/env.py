@@ -6,8 +6,9 @@ from sqlalchemy import engine_from_config, pool
 from app.config import settings
 from app.database import Base
 
-# Models are imported here (Stage 2) so they register on Base.metadata
-# before autogenerate/upgrade runs.
+# Importing app.models registers every table on Base.metadata before
+# autogenerate/upgrade runs.
+import app.models  # noqa: F401
 
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.database_url)
