@@ -1,8 +1,9 @@
-import { post } from "./client";
+import { patch, post } from "./client";
 import type {
   ClinicalAssessmentClassifyOut,
   ExplainabilityGenerateOut,
   LongitudinalAnalyzeOut,
+  NoteUpdateOut,
   NotesGenerateOut,
   ReviewOut,
   ReviewRequest,
@@ -32,3 +33,6 @@ export const submitReview = (payload: ReviewRequest) =>
 
 export const generateNote = (assessmentId: string) =>
   post<NotesGenerateOut>("/notes/generate", { assessment_id: assessmentId });
+
+export const patchNote = (assessmentId: string, noteDraft: string) =>
+  patch<NoteUpdateOut>(`/assessments/${assessmentId}/note`, { note_draft: noteDraft });

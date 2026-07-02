@@ -15,3 +15,12 @@ class NotesGenerateOut(BaseModel):
     note_draft: str
     classification: HealingClassification | None
     confidence_tier: ConfidenceTier | None
+
+
+class NoteUpdateRequest(BaseModel):
+    note_draft: str
+
+
+class NoteUpdateOut(BaseModel):
+    note_id: uuid.UUID
+    note_draft: str

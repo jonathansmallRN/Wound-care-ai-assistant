@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.common.errors import ValidationFailedError
 from app.models.enums import ReviewStatus
-from app.schemas.notes import NotesGenerateOut
+from app.schemas.notes import NoteUpdateOut, NotesGenerateOut
 from app.services import assessment_service, audit_service
 from app.services.ai_client import ai_client
 from app.services.clinical_assessment_service import confidence_tier
@@ -66,3 +66,15 @@ def generate(db: Session, assessment_id: uuid.UUID) -> NotesGenerateOut:
         classification=assessment.clinician_classification,
         confidence_tier=tier,
     )
+
+
+def update_note(db: Session, assessment_id: uuid.UUID, note_draft: str) -> NoteUpdateOut:
+    assessment = assessment_service.get_assessment(db, assessment_id)
+    if assessment.is_baseline:
+        raise ValidationFailedError("Baseline assessments do not have an editable note.")
+    if assessment.note_draft is None:
+        raise ValidationFailedError("Generate the AI note before editing.")
+    assessment.note_draft = note_draft
+    db.commit()
+    db.refresh(assessment)
+    return NoteUpdateOut(note_id=assessment.id, note_draft=assessment.note_draft)

@@ -148,6 +148,11 @@ export interface NotesGenerateOut {
   confidence_tier: ConfidenceTier | null;
 }
 
+export interface NoteUpdateOut {
+  note_id: string;
+  note_draft: string;
+}
+
 // ── Validation ────────────────────────────────────────────────────────────────
 
 export interface ValidationSummaryOut {

@@ -19,6 +19,11 @@ def submit_review(db: Session, payload: ReviewRequest) -> ReviewOut:
     finding = assessment.ai_finding
     ai_classification = finding.classification if finding else None
 
+    if payload.fitzpatrick_scale is None:
+        raise ValidationFailedError(
+            "fitzpatrick_scale is required for skin-tone bias tracking in the validation dashboard."
+        )
+
     if payload.review_status == "overridden":
         if payload.clinician_classification is None or not payload.override_reason:
             raise AppError(

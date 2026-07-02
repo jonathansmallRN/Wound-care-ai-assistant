@@ -57,6 +57,10 @@ class AIClient:
     def __init__(self) -> None:
         self._client: OpenAI | None = None
         if not settings.mock_ai_mode and settings.openai_api_key:
+            # PHI/BAA notice: wound images and patient measurements are transmitted to
+            # OpenAI when MOCK_AI_MODE=false. Ensure a Business Associate Agreement
+            # (BAA) with OpenAI is in place before using this with identifiable patient
+            # data. See README §"Real OpenAI calls" for details.
             self._client = OpenAI(api_key=settings.openai_api_key)
 
     @property

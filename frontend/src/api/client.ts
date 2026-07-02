@@ -39,3 +39,11 @@ export function post<T>(path: string, data?: unknown): Promise<T> {
 export function postForm<T>(path: string, form: FormData): Promise<T> {
   return request<T>(path, { method: "POST", body: form });
 }
+
+export function patch<T>(path: string, data?: unknown): Promise<T> {
+  return request<T>(path, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: data !== undefined ? JSON.stringify(data) : undefined,
+  });
+}

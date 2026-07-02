@@ -1,10 +1,11 @@
+import time
 import uuid
 
 from sqlalchemy.orm import Session
 
 from app.common.errors import ValidationFailedError
 from app.schemas.longitudinal import LongitudinalAnalyzeOut
-from app.services import assessment_service
+from app.services import assessment_service, audit_service
 
 
 def analyze(db: Session, assessment_id: uuid.UUID) -> LongitudinalAnalyzeOut:
@@ -20,12 +21,25 @@ def analyze(db: Session, assessment_id: uuid.UUID) -> LongitudinalAnalyzeOut:
     if finding is None:
         raise ValidationFailedError("Run vision analysis before longitudinal analysis.")
 
+    start = time.monotonic()
     # Positive = area reduced (improvement); negative = area increased.
     area_delta_pct = round((previous.area_cm2 - assessment.area_cm2) / previous.area_cm2 * 100, 1)
+    latency_ms = int((time.monotonic() - start) * 1000)
 
     finding.area_delta_pct = area_delta_pct
     db.commit()
     db.refresh(finding)
+
+    audit_service.log_call(
+        db,
+        assessment_id=assessment_id,
+        service_name="longitudinal",
+        prompt_sent=None,
+        response_received=f"area_delta_pct={area_delta_pct}",
+        model_version=None,
+        latency_ms=latency_ms,
+        success=True,
+    )
 
     return LongitudinalAnalyzeOut(
         previous_assessment_id=previous.id,

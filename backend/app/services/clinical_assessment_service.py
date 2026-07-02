@@ -1,3 +1,4 @@
+import time
 import uuid
 
 from sqlalchemy.orm import Session
@@ -6,7 +7,7 @@ from app.common.errors import ValidationFailedError
 from app.models.ai_classification import AIClassification
 from app.models.enums import HealingClassification
 from app.schemas.clinical_assessment import ClinicalAssessmentClassifyOut, ConfidenceTier
-from app.services import assessment_service
+from app.services import assessment_service, audit_service
 
 
 def confidence_tier(score: float) -> ConfidenceTier:
@@ -37,6 +38,7 @@ def classify(db: Session, assessment_id: uuid.UUID) -> ClinicalAssessmentClassif
     if finding is None or finding.area_delta_pct is None:
         raise ValidationFailedError("Run vision and longitudinal analysis before classification.")
 
+    start = time.monotonic()
     area_delta_pct = finding.area_delta_pct
     tissue_change = finding.tissue_change or "stable"
     drainage_change = finding.drainage_change or "stable"
@@ -85,8 +87,24 @@ def classify(db: Session, assessment_id: uuid.UUID) -> ClinicalAssessmentClassif
     ai_classification.tissue_signal_score = tissue_signal_score
     ai_classification.drainage_signal_score = drainage_signal_score
 
+    latency_ms = int((time.monotonic() - start) * 1000)
     db.commit()
     db.refresh(ai_classification)
+
+    audit_service.log_call(
+        db,
+        assessment_id=assessment_id,
+        service_name="clinical_assessment",
+        prompt_sent=None,
+        response_received=(
+            f"classification={classification.value}, confidence={confidence_score}, "
+            f"area_signal={area_signal_score}, tissue_signal={tissue_signal_score}, "
+            f"drainage_signal={drainage_signal_score}"
+        ),
+        model_version=None,
+        latency_ms=latency_ms,
+        success=True,
+    )
 
     return ClinicalAssessmentClassifyOut(
         classification=classification,

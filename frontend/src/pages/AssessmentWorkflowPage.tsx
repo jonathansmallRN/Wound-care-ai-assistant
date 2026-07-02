@@ -108,6 +108,8 @@ function RunButton({
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 
+const isMockMode = import.meta.env.VITE_MOCK_AI_MODE === "true";
+
 export default function AssessmentWorkflowPage() {
   const { assessmentId } = useParams<{ assessmentId: string }>();
 
@@ -278,6 +280,7 @@ export default function AssessmentWorkflowPage() {
               Progress Note
             </h2>
             <NoteEditor
+              assessmentId={assessment.assessment_id}
               noteDraft={assessment.note_draft}
               classification={assessment.clinician_classification}
               confidenceTier={null}
@@ -496,13 +499,15 @@ export default function AssessmentWorkflowPage() {
               >
                 {uploadingImage ? "Uploading…" : "Upload"}
               </button>
-              <button
-                type="button"
-                onClick={() => setImageUploaded(true)}
-                className="text-xs text-slate-400 hover:text-slate-600 underline"
-              >
-                Skip (mock mode)
-              </button>
+              {isMockMode && (
+                <button
+                  type="button"
+                  onClick={() => setImageUploaded(true)}
+                  className="text-xs text-slate-400 hover:text-slate-600 underline"
+                >
+                  Skip (mock mode)
+                </button>
+              )}
             </div>
             {uploadError && (
               <p className="text-xs text-red-600">{uploadError}</p>
@@ -754,6 +759,7 @@ export default function AssessmentWorkflowPage() {
           />
         ) : noteResult ? (
           <NoteEditor
+            assessmentId={assessment.assessment_id}
             noteDraft={noteResult.note_draft}
             classification={noteResult.classification}
             confidenceTier={noteResult.confidence_tier}

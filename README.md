@@ -81,6 +81,8 @@ Five cases are seeded automatically on first start:
 
 ## Real OpenAI calls (optional)
 
+> **PHI/BAA notice:** When `MOCK_AI_MODE=false`, wound images and patient measurements are transmitted to OpenAI. Before enabling real AI calls in any environment that handles identifiable patient data, confirm that your OpenAI subscription includes a signed Business Associate Agreement (BAA) covering PHI under HIPAA. Do not transmit identifiable patient data without a signed BAA in place.
+
 Edit `.env`:
 
 ```dotenv
