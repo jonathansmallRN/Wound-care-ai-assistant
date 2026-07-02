@@ -124,12 +124,16 @@ def list_assessments_for_case(db: Session, case_id: uuid.UUID) -> list[Assessmen
 
 
 def get_previous_assessment(db: Session, assessment: Assessment) -> Assessment | None:
+    # Use assessment_date (clinician-entered) as the primary comparator.
+    # created_at cannot be used here because within a single DB transaction both
+    # savepointed commits share the same now() timestamp (e.g., in tests), which
+    # would make Assessment.created_at == assessment.created_at and return None.
     return db.scalar(
         select(Assessment)
         .where(
             Assessment.case_id == assessment.case_id,
-            Assessment.created_at < assessment.created_at,
+            Assessment.assessment_date < assessment.assessment_date,
         )
-        .order_by(Assessment.created_at.desc())
+        .order_by(Assessment.assessment_date.desc(), Assessment.created_at.desc())
         .limit(1)
     )
