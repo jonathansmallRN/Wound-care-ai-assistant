@@ -7,6 +7,7 @@ venv/
 node_modules/
 dist/
 .vite/
+*.tsbuildinfo
 
 backend/media/*
 !backend/media/.gitkeep
